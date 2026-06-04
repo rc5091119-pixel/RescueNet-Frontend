@@ -42,29 +42,75 @@ function Rooms() {
   }
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h2>My Rooms</h2>
-
+    <div
+      style={{
+        padding: "30px",
+        backgroundColor: "#f8fafc",
+        minHeight: "100vh",
+      }}
+    >
+      <h2
+        style={{
+          marginBottom: "25px",
+          color: "#0f172a",
+        }}
+      >
+        🚑 Active Rescue Groups
+      </h2>
+      <div
+        style={{
+          maxWidth: "700px",
+          margin: "0 auto",
+        }}
+      ></div>
       {rooms.length === 0 ? (
         <p>No rooms found.</p>
       ) : (
-        rooms.map((roomID) => (
+        rooms.map((room) => (
           <div
-            key={roomID}
+            key={room.RoomID}
             style={{
-              border: "1px solid black",
-              padding: "10px",
-              marginBottom: "10px",
+              backgroundColor: "white",
+              borderRadius: "16px",
+              padding: "24px",
+              maxWidth: "500px",
+              margin: "0 auto 20px auto",
+              textAlign: "center",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+              border: "1px solid #e2e8f0",
             }}
           >
+            <h3 style={{ marginTop: 0 }}>
+              🚑 Rescue Group
+            </h3>
+
             <p>
-              <strong>Room ID:</strong> {roomID}
+              <strong>Created By:</strong>{" "}
+              {room.CreatorName?.Valid
+                ? room.CreatorName.String
+                : "Unknown"}
+            </p>
+
+            <p>
+              <strong>📍 Location:</strong>{" "}
+              {room.Latitude}, {room.Longitude}
             </p>
 
             <button
               onClick={() =>
-                navigate(`/chat/${roomID}`)
+                navigate(`/chat/${room.RoomID}`)
               }
+              style={{
+                marginTop: "12px",
+                padding: "12px 22px",
+                backgroundColor: "#2563eb",
+                color: "white",
+                border: "none",
+                borderRadius: "10px",
+                cursor: "pointer",
+                fontWeight: "600",
+                fontSize: "15px",
+              }}
             >
               Open Chat
             </button>

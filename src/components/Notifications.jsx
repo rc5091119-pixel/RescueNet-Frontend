@@ -23,11 +23,9 @@ function Notifications() {
 
       const data = await response.json();
 
-      console.log("Notifications:", data);
-
       setNotifications(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.error("Failed to fetch notifications:", err);
+      console.error(err);
       setNotifications([]);
     } finally {
       setLoading(false);
@@ -51,7 +49,7 @@ function Notifications() {
       const data = await response.json();
 
       if (!response.ok) {
-        alert(data.error || data.message || "Failed to accept alert");
+        alert(data.error || "Failed to accept");
         return;
       }
 
@@ -59,57 +57,105 @@ function Notifications() {
 
       fetchNotifications();
     } catch (err) {
-      console.error("Accept alert failed:", err);
+      console.error(err);
       alert("Failed to accept alert");
     }
   }
 
   if (loading) {
-    return <h2>Loading notifications...</h2>;
+    return (
+      <h2 style={{ textAlign: "center" }}>
+        Loading Notifications...
+      </h2>
+    );
   }
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h2>Notifications</h2>
+    <div
+      style={{
+        padding: "30px",
+        minHeight: "100vh",
+      }}
+    >
+      <h2
+        style={{
+          textAlign: "center",
+          marginBottom: "30px",
+        }}
+      >
+        🔔 Emergency Notifications
+      </h2>
 
       {notifications.length === 0 ? (
-        <p>No notifications found.</p>
+        <div
+          style={{
+            textAlign: "center",
+            color: "#64748b",
+          }}
+        >
+          No active notifications.
+        </div>
       ) : (
         notifications.map((notification) => (
           <div
             key={notification.ID}
             style={{
-              border: "1px solid #ccc",
-              borderRadius: "8px",
-              padding: "15px",
-              marginBottom: "15px",
+              maxWidth: "700px",
+              margin: "0 auto 20px auto",
+              backgroundColor: "white",
+              borderRadius: "16px",
+              padding: "20px",
+              boxShadow:
+                "0 4px 12px rgba(0,0,0,0.08)",
+              border: "1px solid #e2e8f0",
             }}
           >
-            <p>
-              <strong>Notification ID:</strong> {notification.ID}
-            </p>
-
-            <p>
-              <strong>Alert ID:</strong> {notification.AlertID}
-            </p>
-
-            <p>
-              <strong>Status:</strong> {notification.Status}
-            </p>
+            <h3
+              style={{
+                color: "#dc2626",
+                marginTop: 0,
+              }}
+            >
+              🚨 Emergency Alert
+            </h3>
 
             <p>
               <strong>Created By:</strong>{" "}
               {notification.CreatorName?.Valid
-              ? notification.CreatorName.String
-              : "Unknown User"}
+                ? notification.CreatorName.String
+                : "Unknown User"}
+            </p>
+
+            <p>
+              <strong>Status:</strong>{" "}
+              {notification.Status}
             </p>
 
             <button
-              disabled={notification.Status === "accepted"}
-              onClick={() => acceptAlert(notification.AlertID)}
+              disabled={
+                notification.Status === "accepted"
+              }
+              onClick={() =>
+                acceptAlert(notification.AlertID)
+              }
+              style={{
+                marginTop: "10px",
+                padding: "12px 20px",
+                border: "none",
+                borderRadius: "10px",
+                backgroundColor:
+                  notification.Status ===
+                  "accepted"
+                    ? "#94a3b8"
+                    : "#16a34a",
+                color: "white",
+                fontWeight: "bold",
+                cursor: "pointer",
+              }}
             >
-              {notification.Status === "accepted"
-                ? "Accepted"
+              {notification.Status ===
+              "accepted"
+                ? "✅ Accepted"
                 : "Accept Alert"}
             </button>
           </div>

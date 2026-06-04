@@ -24,8 +24,9 @@ function Login() {
 
       console.log(data);
 
+      localStorage.setItem("user_id", data.id);
+      localStorage.setItem("user_name", data.name);
       localStorage.setItem("token", data.token);
-
       alert("Login Successful!");
     } catch (err) {
       console.error(err);

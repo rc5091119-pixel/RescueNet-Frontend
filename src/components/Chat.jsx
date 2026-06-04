@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 
 function Chat() {
   const { roomID } = useParams();
-
+  const currentUserID = localStorage.getItem("user_id");
   const [roomInfo, setRoomInfo] = useState(null);
   const [messages, setMessages] = useState([]);
   const [content, setContent] = useState("");
@@ -151,32 +151,60 @@ function Chat() {
       </div>
 
       <div
+       style={{
+  height: "500px",
+  overflowY: "auto",
+  padding: "20px",
+  marginBottom: "15px",
+  borderRadius: "12px",
+  backgroundColor: "#f8fafc",
+  border: "1px solid #e2e8f0",
+}}
+      >
+        {messages.map((msg) => {
+  const isMine =
+    msg.SenderID === currentUserID ||
+    msg.SenderName?.String === "Me";
+
+  return (
+    <div
+      key={msg.ID}
+      style={{
+        display: "flex",
+        justifyContent: isMine ? "flex-end" : "flex-start",
+        marginBottom: "12px",
+      }}
+    >
+      <div
         style={{
-          border: "1px solid black",
-          height: "400px",
-          overflowY: "scroll",
-          padding: "10px",
-          marginBottom: "10px",
+          maxWidth: "60%",
+          minWidth: "120px",
+          backgroundColor: isMine ? "#2563eb" : "#f1f5f9",
+          color: isMine ? "white" : "black",
+          padding: "10px 14px",
+          borderRadius: "14px",
+          boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
         }}
       >
-        {messages.map((msg) => (
+        {!isMine && (
           <div
-            key={msg.ID}
             style={{
-              marginBottom: "10px",
-              borderBottom: "1px solid #ddd",
-              paddingBottom: "5px",
+              fontSize: "12px",
+              fontWeight: "bold",
+              marginBottom: "4px",
             }}
           >
-            <strong>
-              {msg.SenderName?.Valid
-                ? msg.SenderName.String
-                : msg.SenderID || "Unknown User"}
-            </strong>
-
-            <p>{msg.Content}</p>
+            {msg.SenderName?.Valid
+              ? msg.SenderName.String
+              : "Unknown User"}
           </div>
-        ))}
+        )}
+
+        <div>{msg.Content}</div>
+      </div>
+    </div>
+  );
+})}
         
         <div ref={messagesEndRef}></div>
       </div>
