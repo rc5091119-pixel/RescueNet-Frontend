@@ -7,9 +7,27 @@ function Chat() {
   const [roomInfo, setRoomInfo] = useState(null);
   const [messages, setMessages] = useState([]);
   const [content, setContent] = useState("");
+  const [responders, setResponders] = useState([]);
   const [locationName, setLocationName] = useState("");
   const wsRef = useRef(null);
   const messagesEndRef = useRef(null);
+
+  async function fetchResponders() {
+    const token = localStorage.getItem("token");
+
+    const response = await fetch(
+      `http://localhost:8080/api/rooms/${roomID}/locations`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const data = await response.json();
+
+    setResponders(Array.isArray(data) ? data : []);
+  }
 
   async function getLocationName(lat, lng) {
     try {
@@ -21,16 +39,20 @@ function Chat() {
 
       console.log("Location Data:", data);
 
-      setLocationName(data.display_name);
+      setLocationName(
+        `${data.address.suburb || ""}
+       ${data.address.city || data.address.town || ""}
+       ${data.address.state || ""}`
+      );
     } catch (err) {
       console.error("Location lookup failed:", err);
     }
   }
-
   useEffect(() => {
     fetchRoomInfo();
     fetchMessages();
-    
+    fetchResponders();
+
     const token = localStorage.getItem("token");
 
     const ws = new WebSocket(
@@ -81,14 +103,14 @@ function Chat() {
 
       const data = await response.json();
 
-console.log("Room Info:", data);
+      console.log("Room Info:", data);
 
-setRoomInfo(data);
+      setRoomInfo(data);
 
-getLocationName(
-  data.Latitude,
-  data.Longitude
-);
+      getLocationName(
+        data.Latitude,
+        data.Longitude
+      );
     } catch (err) {
       console.error("Failed to fetch room info:", err);
     }
@@ -135,9 +157,9 @@ getLocationName(
           Valid: true,
         },
         Content: text,
+        CreatedAt: new Date().toISOString(),
       },
     ]);
-
     setContent("");
   }
 
@@ -167,6 +189,34 @@ getLocationName(
           <strong>📍 Alert Location:</strong>{" "}
           {locationName || "Loading location..."}
         </p>
+        <div
+          style={{
+            marginTop: "15px",
+            padding: "12px",
+            backgroundColor: "white",
+            borderRadius: "10px",
+            border: "1px solid #e2e8f0",
+          }}
+        >
+          <strong>
+            👥 Active Responders ({responders.length})
+          </strong>
+
+          {responders.length === 0 ? (
+            <p style={{ marginTop: "8px" }}>
+              No responders found
+            </p>
+          ) : (
+            responders.map((r) => (
+              <div key={r.ID}>
+                🟢 {r.Name?.Valid
+                  ? r.Name.String
+                  : "Unknown User"}
+              </div>
+            ))
+          )}
+        </div>
+
         <button
           onClick={() =>
             window.open(
@@ -225,21 +275,43 @@ getLocationName(
                   boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
                 }}
               >
-                {!isMine && (
-                  <div
-                    style={{
-                      fontSize: "12px",
-                      fontWeight: "bold",
-                      marginBottom: "4px",
-                    }}
-                  >
-                    {msg.SenderName?.Valid
-                      ? msg.SenderName.String
-                      : "Unknown User"}
-                  </div>
-                )}
+                <div
+                  style={{
+                    fontSize: "12px",
+                    fontWeight: "bold",
+                    marginBottom: "4px",
+                  }}
+                >
+                  {isMine
+                    ? "Me"
+                    : (
+                      msg.SenderName?.Valid
+                        ? msg.SenderName.String
+                        : "Unknown User"
+                    )}
+                </div>
 
                 <div>{msg.Content}</div>
+
+                <div
+                  style={{
+                    fontSize: "11px",
+                    color: isMine
+                      ? "#dbeafe"
+                      : "#64748b",
+                    marginTop: "6px",
+                    textAlign:
+                      msg.SenderID === currentUserID
+                        ? "right"
+                        : "left",
+                  }}
+                >
+                  {new Date(msg.CreatedAt).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </div>
+
               </div>
             </div>
           );
@@ -247,20 +319,55 @@ getLocationName(
 
         <div ref={messagesEndRef}></div>
       </div>
-
-      <input
-        type="text"
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-        placeholder="Type message..."
+      <div
         style={{
-          width: "300px",
-          marginRight: "10px",
+          display: "flex",
+          alignItems: "center",
+          gap: "12px",
+          marginTop: "15px",
         }}
-      />
+      >
+        <input
+          type="text"
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          placeholder="Type a message..."
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              sendMessage();
+            }
+          }}
+          style={{
+            flex: 1,
+            padding: "14px 18px",
+            borderRadius: "14px",
+            border: "1px solid #cbd5e1",
+            outline: "none",
+            fontSize: "15px",
+            backgroundColor: "white",
+            color: "#0f172a",
+            caretColor: "#2563eb",
+          }}
+        />
 
-      <button onClick={sendMessage}>Send</button>
+        <button
+          onClick={sendMessage}
+          style={{
+            border: "none",
+            borderRadius: "14px",
+            padding: "14px 22px",
+            backgroundColor: "#2563eb",
+            color: "white",
+            fontWeight: "bold",
+            cursor: "pointer",
+            fontSize: "15px",
+          }}
+        >
+          ➤
+        </button>
+      </div>
     </div>
+
   );
 }
 

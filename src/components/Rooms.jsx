@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 function Rooms() {
   const [rooms, setRooms] = useState([]);
+  const [locationNames, setLocationNames] = useState({});
   const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
@@ -10,6 +11,27 @@ function Rooms() {
   useEffect(() => {
     fetchRooms();
   }, []);
+  async function getLocationName(lat, lng, roomID) {
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
+      );
+
+      const data = await response.json();
+
+      const location =
+        `${data.address.suburb || ""}
+       ${data.address.city || data.address.town || ""}
+       ${data.address.state || ""}`;
+
+      setLocationNames((prev) => ({
+        ...prev,
+        [roomID]: location,
+      }));
+    } catch (err) {
+      console.error("Location lookup failed:", err);
+    }
+  }
 
   async function fetchRooms() {
     const token = localStorage.getItem("token");
@@ -28,7 +50,17 @@ function Rooms() {
 
       console.log("Rooms:", data);
 
-      setRooms(Array.isArray(data) ? data : []);
+      const roomsData = Array.isArray(data) ? data : [];
+
+      setRooms(roomsData);
+
+      roomsData.forEach((room) => {
+        getLocationName(
+          room.Latitude,
+          room.Longitude,
+          room.RoomID
+        );
+      });
     } catch (err) {
       console.error("Failed to fetch rooms:", err);
       setRooms([]);
@@ -93,9 +125,9 @@ function Rooms() {
 
             <p>
               <strong>📍 Location:</strong>{" "}
-              {room.Latitude}, {room.Longitude}
+              {locationNames[room.RoomID] ||
+                "Loading location..."}
             </p>
-
             <button
               onClick={() =>
                 navigate(`/chat/${room.RoomID}`)

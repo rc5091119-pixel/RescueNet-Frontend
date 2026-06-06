@@ -1,4 +1,6 @@
 import ProtectedRoute from "./components/ProtectedRoute";
+import Home from "./components/Home";
+import Dashboard from "./components/Dashboard";
 import {
   BrowserRouter,
   Routes,
@@ -70,6 +72,18 @@ function Navbar() {
         {token ? (
           <>
             <Link
+              to="/"
+              style={navLinkStyle}
+            >
+              🏠 Home
+            </Link>
+            <Link
+              to="/dashboard"
+              style={navLinkStyle}
+            >
+              🏠 Dashboard
+            </Link>
+            <Link
               to="/location"
               style={navLinkStyle}
             >
@@ -127,21 +141,6 @@ function Navbar() {
         {token && (
           <>
             <span>{userName || "User"}</span>
-
-            <button
-              onClick={handleLogout}
-              style={{
-                backgroundColor: "#dc2626",
-                color: "white",
-                border: "none",
-                padding: "8px 14px",
-                borderRadius: "8px",
-                cursor: "pointer",
-                fontWeight: "bold",
-              }}
-            >
-              Logout
-            </button>
           </>
         )}
       </div>
@@ -152,10 +151,8 @@ function Navbar() {
 function App() {
   return (
     <BrowserRouter>
-      <Navbar />
-
       <Routes>
-        <Route path="/" element={<Login />} />
+        <Route path="/" element={<Home />} />
 
         <Route
           path="/register"
@@ -165,6 +162,14 @@ function App() {
         <Route
           path="/login"
           element={<Login />}
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
         />
 
         <Route
