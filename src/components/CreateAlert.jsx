@@ -5,6 +5,7 @@ function CreateAlert() {
 
   async function handleAlert() {
     const token = localStorage.getItem("token");
+    console.log("TOKEN =", token);
 
     setLoading(true);
 
