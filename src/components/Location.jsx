@@ -108,6 +108,9 @@ function Location() {
           style={{
             textAlign: "center",
             marginBottom: "10px",
+            color: "#111827",
+            fontWeight: "800",
+            fontSize: "42px",
           }}
         >
           📍 Update Location
@@ -134,7 +137,16 @@ function Location() {
             overflowY: "auto",
           }}
         >
-          <strong>Current Location:</strong>
+          <p
+            style={{
+              fontWeight: "700",
+              color: "#64748b",
+              marginBottom: "10px",
+              fontSize: "18px",
+            }}
+          >
+            Current Location:
+          </p>
 
           <p
             style={{
